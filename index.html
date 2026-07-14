@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>🎒 東海道クイズラリー 🎒</title>
+    <style>
+        /* 背景に東海道の浮世絵（箱根）をセットし、画面全体に広げる */
+        body { 
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b8/The_Fifty-three_Stations_of_the_T%C5%8Dkaid%C5%8D%2C_Hakone_by_Hiroshige.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        /* 背景だけをほどよくぼかす効果 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(240, 244, 248, 0.4); 
+            backdrop-filter: blur(6px); 
+            -webkit-backdrop-filter: blur(6px);
+            z-index: -1;
+        }
+
+        .container { 
+            background: rgba(255, 255, 255, 0.95); 
+            max-width: 650px; 
+            width: 100%;
+            margin: 0 auto; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+        }
+
+        /* グラデーション文字のタイトル */
+        h1 { 
+            font-size: 32px;
+            margin: 0 0 5px 0; 
+            background: linear-gradient(to right, #d35400, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+        }
+
+        .subtitle { color: #486581; margin-bottom: 25px; font-weight: bold; }
+        
+        /* 💡 昔作ったデザインを再現した茶色の木札風ボタン 💡 */
+        button { 
+            cursor: pointer; 
+            padding: 16px; 
+            border-radius: 10px; 
+            background: repeating-linear-gradient(90deg, #e5a967, #e5a967 10px, #de9e58 10px, #de9e58 20px);
+            border: 4px solid #6e3f10; 
+            color: #ffffff;
+            font-weight: bold; 
+            font-size: 18px; 
+            width: 100%; 
+            margin: 10px 0; 
+            text-align: center; 
+            text-shadow: 2px 2px 2px #000000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.4); }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0,0,0,0.2); }
+        
+        /* 画面の切り替え用 */
+        .page { display: none; }
+        .active { display: block; }
+
+        .quiz-box { background: rgba(240, 244, 248, 0.8); padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid #d9e2ec; text-align: left; }
+        .quiz-box h2 { margin-top: 0; color: #102a43; }
+
+        /* キャラクター案内ボックス */
+        .char-box {
+            display: flex;
+            align-items: center;
+            background: #fff8e1;
+            border: 2px solid #ffe082;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .char-img {
+            font-size: 50px;
+            margin-right: 15px;
+            background: #ffffff;
+            border-radius: 50%;
+            width: 70px; height: 70px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .char-text { flex: 1; font-size: 15px; line-height: 1.5; color: #5d4037; }
+
+        /* 青い木札ボタン */
+        .btn-blue { background: repeating-linear-gradient(90deg, #5dade2, #5dade2 10px, #3498db 10px, #3498db 20px); border: 4px solid #21618c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="intro-page" class="page active">
+        <h1>🎒 東海道クイズラリー 🎒</h1>
+        <p class="subtitle">〜 歴史ある街道を旅しよう 〜</p>
+
+        <div class="char-box">
+            <div class="char-img">👨‍歩</div>
+            <div class="char-text">
+                <strong>とうかいどうくん：</strong><br>
+                「やあ！おいらは旅人の『とうかいどうくん』だヨ！これから東海道に関するクイズを全10問出すから、旅をする気分で挑戦してみてね！見事【10点満点】をとれたら、3班のひみつの暗号を教えてあげるヨ！がんばって旅をすすめよう！」
+            </div>
+        </div>
+
+        <button onclick="startQuiz()">クイズをはじめる！ 🚀</button>
+        <button onclick="goToBoard()" class="btn-blue" style="font-size: 16px; padding: 12px 0;">🏆 満点おめでとうボードを見に行く 🏆</button>
+    </div>
+
+    <div id="quiz-page" class="page">
+        <h1>🎒 東海道クイズラリー 🎒</h1>
+        
+        <div class="quiz-box">
+            <h2 id="question-number">第 1 問</h2>
+            <p id="question-text" style="font-size: 18px; font-weight: bold; margin-bottom: 20px;"></p>
+            <div id="choices-area"></div>
+        </div>
+        <p style="font-weight: bold; font-size: 18px;">現在のスコア: <span id="current-score" style="color: #d35400; font-size: 22px;">0</span> / 10 点</p>
+    </div>
+
+</div>
+
+<script>
+    // クイズ用データ
+    const quizData = [
+        { q: "東海道クイズ第1問：東海道はどこからどこまで？", c: ["日本橋から三条大橋", "日本橋から日光", "京都から大阪", "浅草から五条大橋"], a: 0 },
+        { q: "東海道クイズ第2問：日本橋があるのは何県？", c: ["神奈川県", "東京都", "千葉県", "埼玉県"], a: 1 },
+        { q: "東海道クイズ第3問：現在の神奈川県にある、箱根宿の近くにある有名な湖は？", c: ["浜名湖", "芦ノ湖", "琵琶湖", "中禅寺湖"], a: 1 },
+        { q: "東海道クイズ第4問：静岡県にある、お茶の生産で有名な宿場は？", c: ["金谷宿", "鞠子宿", "府中国", "掛川宿"], a: 0 },
+        { q: "東海道クイズ第5問：大井川を渡るために旅人が利用した、人を肩や台に乗せて運ぶ方法を何という？", c: ["川越し", "渡し船", "橋渡し", "早馬"], a: 0 },
+        { q: "東海道クイズ第6問：愛知県にある、織田信長が今川義元を破った戦いの舞台に近い宿場は？", c: ["宮宿", "鳴海宿", "岡崎宿", "池鯉鮒宿"], a: 1 },
+        { q: "東海道クイズ第7問：三重県にある、伊勢神宮への参拝口として賑わった宿場は？", c: ["桑名宿", "四日市宿", "関宿", "庄野宿"], a: 2 },
+        { q: "東海道クイズ第8問：滋賀県にある、日本最大の湖「琵琶湖」の近くにある宿場は？", c: ["大津宿", "草津宿", "石部宿", "水口宿"], a: 0 },
+        { q: "東海道クイズ第9問：東海道の終点である三条大橋があるのは何県（何府）？", c: ["大阪府", "京都府", "奈良県", "滋賀県"], a: 1 },
+        { q: "東海道クイズ第10問：江戸時代に東海道を旅した旅人の一般的な移動手段は？", c: ["馬", "徒歩", "駕籠（かご）", "船"], a: 1 }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function startQuiz() {
+        document.getElementById("intro-page").classList.remove("active");
+        document.getElementById("quiz-page").classList.add("active");
+        loadQuestion();
+    }
+
+    function goToBoard() {
+        window.location.href = "https://81024-sakamkaki.github.io/-quiz-/";
+    }
+
+    function loadQuestion() {
+        const currentQuiz = quizData[currentQuestionIndex];
+        document.getElementById("question-number").innerText = `第 ${currentQuestionIndex + 1} 問 / 10問`;
+        document.getElementById("question-text").innerText = currentQuiz.q;
+
+        const choicesArea = document.getElementById("choices-area");
+        choicesArea.innerHTML = "";
+
+        currentQuiz.c.forEach((choice, index) => {
+            const btn = document.createElement("button");
+            btn.innerText = `${index + 1}. ${choice}`;
+            btn.onclick = () => checkAnswer(index);
+            choicesArea.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex) {
+        const currentQuiz = quizData[currentQuestionIndex];
+        if (selectedIndex === currentQuiz.a) {
+            alert("⭕ 正解だヨ！");
+            score++;
+        } else {
+            alert(`❌ 残念！ 正解は「${currentQuiz.c[currentQuiz.a]}」だったヨ。`);
+        }
+
+        document.getElementById("current-score").innerText = score;
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    // 💡 得点数に関係なく、終わったら必ず案内する関数にしたヨ！
+    function finishQuiz() {
+        if (score === 10) {
+            alert(`🎉 すごいっ！！10点満点大正解！！ 🎉\n\n【3班の暗号】は『 TOFU 』だよ！\nOKを押すと、満点おめでとうボードのページに移動します！`);
+        } else {
+            alert(`クイズ終了！きみのスコアは ${score} 点だったヨ！\n10点満点をとると秘密の暗号が使えるよ！\nOKを押すと、おめでとうボードのページに移動します！`);
+        }
+        // ここで指定のURLへ全員ジャンプさせるヨ
+        window.location.href = "https://81024-sakamkaki.github.io/-quiz-/";
+    }
+</script>
+</body>
+</html>
